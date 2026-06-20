@@ -58,7 +58,7 @@ export function ChallengesBoard() {
           </p>
           <div className="mt-5 space-y-5">
             {data.active.map((challenge) => (
-              <div key={challenge.title} className="rounded-[24px] border border-white/70 bg-white/76 p-4">
+              <div key={challenge.title} className="rounded-[24px] border border-white/70 bg-white/80 dark:border-white/10 dark:bg-white/5 p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <h3 className="font-semibold text-foreground">{challenge.title}</h3>
@@ -82,7 +82,7 @@ export function ChallengesBoard() {
             {data.achievements.map((achievement) => (
               <div
                 key={achievement.title}
-                className="rounded-[24px] border border-white/70 bg-gradient-to-br from-white to-emerald-50 px-4 py-4"
+                className="rounded-[24px] border border-white/70 bg-gradient-to-br from-white to-emerald-50 px-4 py-4 dark:border-white/10 dark:from-white/5 dark:to-emerald-950/20"
               >
                 <p className="font-semibold text-foreground">{achievement.title}</p>
                 <p className="mt-1 text-sm leading-6 text-muted">{achievement.detail}</p>

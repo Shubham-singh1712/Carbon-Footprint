@@ -8,10 +8,10 @@ export function BrandMark({ className }: { className?: string }) {
         <Leaf className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-sm font-semibold tracking-[0.28em] text-muted uppercase">
-          CarbonTwin
-        </p>
-        <p className="text-lg font-semibold text-foreground">AI</p>
+        <div className="flex items-center gap-1.5 leading-none">
+          <span className="text-lg font-bold tracking-tight text-foreground">CarbonTwin</span>
+          <span className="rounded-md bg-accent/10 px-1.5 py-0.5 text-[10px] font-bold text-accent uppercase tracking-wider">AI</span>
+        </div>
       </div>
     </div>
   );

@@ -29,7 +29,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
               <Bell className="mr-2 h-4 w-4" aria-hidden="true" />
               Alerts
             </Button>
-            <Link href={demoMode ? "/auth/sign-in" : "/dashboard"}>
+            <Link href={demoMode ? "/auth/sign-in" : "/dashboard"} className="inline-flex">
               <Button>
                 <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
                 {demoMode ? "Connect account" : "My profile"}

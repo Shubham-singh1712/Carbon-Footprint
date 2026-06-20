@@ -10,7 +10,7 @@ const buttonVariants = cva(
         primary:
           "bg-accent px-5 py-3 text-white shadow-[0_18px_50px_-20px_rgba(15,159,111,0.75)] hover:bg-accent-strong",
         secondary:
-          "border border-border bg-white/75 px-5 py-3 text-foreground hover:bg-white",
+          "border border-border bg-white/75 dark:bg-white/10 px-5 py-3 text-foreground hover:bg-white dark:hover:bg-white/15",
         ghost: "px-4 py-2 text-muted hover:bg-white/70 hover:text-foreground",
       },
       size: {

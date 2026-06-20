@@ -11,9 +11,9 @@ export function PlatformSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="glass-panel-strong sticky top-6 hidden h-[calc(100vh-3rem)] w-80 flex-col p-6 lg:flex">
-      <BrandMark className="mb-8" />
-      <nav className="space-y-1.5" aria-label="Platform navigation">
+    <aside className="glass-panel-strong sticky top-6 hidden h-[calc(100vh-3rem)] w-80 flex-col p-6 lg:flex overflow-hidden">
+      <BrandMark className="mb-8 flex-shrink-0" />
+      <nav className="space-y-1.5 flex-1 overflow-y-auto pr-1 pb-4" aria-label="Platform navigation">
         {platformNavigation.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
@@ -37,7 +37,7 @@ export function PlatformSidebar() {
         })}
       </nav>
 
-      <div className="mt-auto space-y-4">
+      <div className="mt-auto space-y-4 flex-shrink-0 pt-4 border-t border-border/40">
         <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
           <span className="text-xs font-medium text-muted">Theme</span>
           <ThemeToggle />
