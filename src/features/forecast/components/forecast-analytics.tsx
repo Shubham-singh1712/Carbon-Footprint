@@ -110,7 +110,7 @@ export function ForecastAnalytics() {
             {data.signals.map((signal) => (
               <div
                 key={signal}
-                className="rounded-[24px] border border-white/70 bg-white/78 px-4 py-4 text-sm leading-7 text-muted"
+                className="rounded-[24px] border border-white/70 bg-white/78 dark:border-white/10 dark:bg-white/5 px-4 py-4 text-sm leading-7 text-muted"
               >
                 {signal}
               </div>

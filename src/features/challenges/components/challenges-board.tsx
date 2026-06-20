@@ -38,7 +38,7 @@ export function ChallengesBoard() {
         </Card>
         <Card className="p-6">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-white/80 text-accent">
+            <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-white/80 dark:bg-white/10 text-accent">
               <Award className="h-6 w-6" />
             </div>
             <div>

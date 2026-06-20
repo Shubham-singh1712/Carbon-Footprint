@@ -67,7 +67,7 @@ export function ReceiptScannerPanel() {
           </div>
         </div>
 
-        <label className="mb-5 block rounded-[28px] border border-dashed border-accent/30 bg-white/75 p-6 cursor-pointer hover:bg-white transition-all">
+        <label className="mb-5 block rounded-[28px] border border-dashed border-accent/30 bg-white/75 dark:border-white/10 dark:bg-white/5 p-6 cursor-pointer hover:bg-white dark:hover:bg-white/10 transition-all">
           <div className="flex flex-col items-center justify-center text-center">
             <Camera className="h-8 w-8 text-accent" />
             <p className="mt-3 text-base font-semibold text-foreground">
@@ -129,7 +129,7 @@ export function ReceiptScannerPanel() {
               {...form.register("amount", { valueAsNumber: true })}
             />
             <select
-              className="h-11 rounded-2xl border border-white/70 bg-white/80 px-4 text-sm text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-ring"
+              className="h-11 rounded-2xl border border-white/70 bg-white/80 dark:border-white/10 dark:bg-white/5 px-4 text-sm text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-ring"
               {...form.register("category")}
             >
               {categories.map((category) => (
@@ -163,7 +163,7 @@ export function ReceiptScannerPanel() {
                 Confidence {scanMutation.data.confidence}%
               </p>
             </div>
-            <div className="rounded-[24px] border border-white/70 bg-white/78 p-4">
+            <div className="rounded-[24px] border border-white/70 bg-white/78 dark:border-white/10 dark:bg-white/5 p-4">
               <p className="font-semibold text-foreground">
                 {scanMutation.data.normalized.vendor}
               </p>
@@ -178,7 +178,7 @@ export function ReceiptScannerPanel() {
               {scanMutation.data.insights.map((insight) => (
                 <div
                   key={insight}
-                  className="rounded-[22px] border border-white/70 bg-white/72 px-4 py-3 text-sm text-muted"
+                  className="rounded-[22px] border border-white/70 bg-white/72 dark:border-white/10 dark:bg-white/5 px-4 py-3 text-sm text-muted"
                 >
                   {insight}
                 </div>
