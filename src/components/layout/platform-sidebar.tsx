@@ -44,9 +44,6 @@ export function PlatformSidebar() {
           <h3 className="mt-3 text-lg font-semibold text-foreground">
             Your biggest savings are hidden in commute timing and grocery choices.
           </h3>
-          <p className="mt-2 text-sm text-muted">
-            CarbonTwin AI keeps the product in demo mode until Supabase keys are added.
-          </p>
         </div>
       </div>
     </aside>
