@@ -10,9 +10,9 @@ export function PlatformSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="glass-panel-strong sticky top-6 hidden h-[calc(100vh-3rem)] w-80 flex-col p-6 lg:flex overflow-hidden">
-      <BrandMark className="mb-8 flex-shrink-0" />
-      <nav className="space-y-1.5 flex-1 overflow-y-auto scrollbar-none pb-4" aria-label="Platform navigation">
+    <aside className="glass-panel-strong sticky top-6 hidden h-[calc(100vh-3rem)] w-80 flex-col p-5 lg:flex overflow-hidden">
+      <BrandMark className="mb-6 flex-shrink-0" />
+      <nav className="space-y-1 flex-1 overflow-y-auto scrollbar-none pb-4" aria-label="Platform navigation">
         {platformNavigation.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
@@ -22,7 +22,7 @@ export function PlatformSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all",
+                "flex items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-medium transition-all",
                 active
                   ? "bg-accent text-white shadow-[0_20px_45px_-30px_rgba(15,159,111,0.9)]"
                   : "text-muted hover:bg-white/70 hover:text-foreground dark:hover:bg-white/5",
@@ -37,11 +37,11 @@ export function PlatformSidebar() {
       </nav>
 
       <div className="mt-auto space-y-4 flex-shrink-0 pt-4 border-t border-border/40">
-        <div className="rounded-[28px] border border-white/70 bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">
+        <div className="rounded-[20px] border border-white/70 bg-white/80 p-4 dark:border-white/10 dark:bg-white/5">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
             Live Insight
           </p>
-          <h3 className="mt-3 text-lg font-semibold text-foreground">
+          <h3 className="mt-2 text-sm font-medium leading-6 text-foreground">
             Your biggest savings are hidden in commute timing and grocery choices.
           </h3>
         </div>
