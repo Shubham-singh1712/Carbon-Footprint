@@ -1,0 +1,290 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/*  Light theme (default)                                             */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --background: #edf7f0;
+  --background-strong: #d6ebdc;
+  --foreground: #10221a;
+  --card: rgba(255, 255, 255, 0.72);
+  --card-strong: rgba(255, 255, 255, 0.88);
+  --muted: #5d7267;
+  --border: rgba(16, 34, 26, 0.09);
+  --accent: #0f9f6f;
+  --accent-strong: #0d7a56;
+  --accent-soft: rgba(15, 159, 111, 0.12);
+  --warning: #d97706;
+  --danger: #dc2626;
+  --ring: rgba(15, 159, 111, 0.28);
+  --input-bg: rgba(255, 255, 255, 0.8);
+  --sidebar-bg: rgba(255, 255, 255, 0.82);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Dark theme                                                        */
+/* ------------------------------------------------------------------ */
+
+.dark {
+  --background: #0c1a14;
+  --background-strong: #142620;
+  --foreground: #e8f0ec;
+  --card: rgba(22, 42, 32, 0.72);
+  --card-strong: rgba(22, 42, 32, 0.88);
+  --muted: #8fa99b;
+  --border: rgba(228, 240, 232, 0.10);
+  --accent: #22c983;
+  --accent-strong: #18a86d;
+  --accent-soft: rgba(34, 201, 131, 0.14);
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --ring: rgba(34, 201, 131, 0.30);
+  --input-bg: rgba(22, 42, 32, 0.6);
+  --sidebar-bg: rgba(22, 42, 32, 0.85);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Theme tokens → Tailwind v4                                        */
+/* ------------------------------------------------------------------ */
+
+@theme {
+  --color-background: var(--background);
+  --color-background-strong: var(--background-strong);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-strong: var(--card-strong);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-ring: var(--ring);
+  --color-input-bg: var(--input-bg);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                              */
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply text-foreground font-sans antialiased;
+    background:
+      radial-gradient(circle at top left, rgba(15, 159, 111, 0.24), transparent 36%),
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.65), transparent 28%),
+      linear-gradient(180deg, #f6fbf7 0%, #edf7f0 36%, #e4f0e8 100%);
+    min-height: 100vh;
+  }
+
+  .dark body {
+    background:
+      radial-gradient(circle at top left, rgba(15, 159, 111, 0.12), transparent 36%),
+      radial-gradient(circle at top right, rgba(22, 42, 32, 0.6), transparent 28%),
+      linear-gradient(180deg, #0c1a14 0%, #0e1f17 36%, #0c1a14 100%);
+  }
+
+  a {
+    @apply transition-colors duration-200;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Utilities                                                         */
+/* ------------------------------------------------------------------ */
+
+@layer utilities {
+  .glass-panel {
+    @apply rounded-[28px] border border-white/60 bg-white/65 shadow-[0_24px_80px_-32px_rgba(16,34,26,0.35)] backdrop-blur-2xl;
+  }
+
+  .dark .glass-panel {
+    @apply border-white/8 bg-white/5 shadow-[0_24px_80px_-32px_rgba(0,0,0,0.55)];
+  }
+
+  .glass-panel-strong {
+    @apply rounded-[32px] border border-white/80 bg-white/82 shadow-[0_28px_90px_-40px_rgba(16,34,26,0.45)] backdrop-blur-2xl;
+  }
+
+  .dark .glass-panel-strong {
+    @apply border-white/10 bg-white/8 shadow-[0_28px_90px_-40px_rgba(0,0,0,0.6)];
+  }
+
+  .hero-grid {
+    background-image:
+      linear-gradient(to right, rgba(16, 34, 26, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(16, 34, 26, 0.05) 1px, transparent 1px);
+    background-size: 72px 72px;
+  }
+
+  .dark .hero-grid {
+    background-image:
+      linear-gradient(to right, rgba(228, 240, 232, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(228, 240, 232, 0.04) 1px, transparent 1px);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glow-ring {
+    box-shadow: 0 0 0 10px rgba(15, 159, 111, 0.06);
+  }
+
+  .page-shell {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .page-section {
+    @apply py-10 sm:py-14;
+  }
+
+  .floating-orb {
+    animation: drift 12s ease-in-out infinite;
+  }
+
+  .gradient-headline {
+    background: linear-gradient(100deg, #0b3d2b 0%, #0f9f6f 42%, #6cc58e 72%, #f3c969 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .dark .gradient-headline {
+    background: linear-gradient(100deg, #7ccba4 0%, #22c983 42%, #6fdfa8 72%, #fcd34d 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .carbon-particles {
+    @apply pointer-events-none absolute inset-0 overflow-hidden;
+  }
+
+  .carbon-particles span {
+    --size: calc(5px + (var(--i) % 5) * 2px);
+    position: absolute;
+    left: calc((var(--i) * 47) % 100 * 1%);
+    top: calc((var(--i) * 29) % 100 * 1%);
+    width: var(--size);
+    height: var(--size);
+    border-radius: 999px;
+    background: rgba(15, 159, 111, 0.22);
+    animation: particle-float calc(9s + (var(--i) % 6) * 1s) ease-in-out infinite;
+    animation-delay: calc(var(--i) * -420ms);
+  }
+
+  .carbon-visualization {
+    animation: visualization-rise 900ms ease both;
+  }
+
+  .scroll-reveal {
+    --delay: 0ms;
+    animation: reveal-up 720ms ease both;
+    animation-delay: var(--delay);
+  }
+
+  /* Custom range slider */
+  .range-slider {
+    @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-background-strong;
+  }
+
+  .range-slider::-webkit-slider-thumb {
+    @apply h-5 w-5 appearance-none rounded-full border-2 border-accent bg-white shadow-md;
+  }
+
+  .dark .range-slider::-webkit-slider-thumb {
+    @apply bg-background-strong;
+  }
+
+  .range-slider::-moz-range-thumb {
+    @apply h-5 w-5 rounded-full border-2 border-accent bg-white shadow-md;
+  }
+
+  .range-slider:focus-visible {
+    @apply outline-none;
+  }
+
+  .range-slider:focus-visible::-webkit-slider-thumb {
+    @apply ring-4 ring-ring;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Keyframes                                                         */
+/* ------------------------------------------------------------------ */
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes particle-float {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 0.68;
+    transform: translate3d(18px, -26px, 0);
+  }
+}
+
+@keyframes visualization-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .scroll-reveal {
+    animation-timeline: view();
+    animation-range: entry 0% cover 28%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
