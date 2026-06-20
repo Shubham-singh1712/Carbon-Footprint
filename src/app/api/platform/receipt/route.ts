@@ -44,13 +44,22 @@ Return a raw JSON object with this exact structure:
     "A general recommendation."
   ]
 }`;
-    const ocrResult = await callGeminiVision(payload.image, "image/jpeg", prompt);
+    const ocrResult = (await callGeminiVision(payload.image, "image/jpeg", prompt)) as {
+      category?: string;
+      estimatedKg?: number | string;
+      amount?: number | string;
+      confidence?: number | string;
+      vendor?: string;
+      insights?: string[];
+      [key: string]: unknown;
+    } | null;
     if (ocrResult && typeof ocrResult === "object") {
       let category = ocrResult.category || "shopping";
       if (!["food", "mobility", "home", "shopping", "digital"].includes(category)) {
         category = "shopping";
       }
-      const estimatedKg = Number(ocrResult.estimatedKg) || Number(((ocrResult.amount || payload.amount) * multipliers[category as keyof typeof multipliers]).toFixed(1));
+      const amountVal = Number(ocrResult.amount || payload.amount) || 0;
+      const estimatedKg = Number(ocrResult.estimatedKg) || Number((amountVal * multipliers[category as keyof typeof multipliers]).toFixed(1));
       
       return jsonResponse(
         receiptAnalysisResponseSchema,
@@ -60,7 +69,7 @@ Return a raw JSON object with this exact structure:
           normalized: {
             vendor: String(ocrResult.vendor || payload.vendor),
             category,
-            spend: Number(ocrResult.amount || payload.amount),
+            spend: amountVal,
             impactBand: estimatedKg > 18 ? "High" : estimatedKg > 10 ? "Medium" : "Low",
           },
           insights: Array.isArray(ocrResult.insights) ? ocrResult.insights : [

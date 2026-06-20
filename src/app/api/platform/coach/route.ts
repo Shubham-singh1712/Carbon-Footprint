@@ -131,11 +131,14 @@ Ensure the recommendations are realistic, and reflect their active footprint cat
     const userPrompt = `User Query: "${payload.prompt}"
 User Onboarding Profile Context: ${payload.profile ? JSON.stringify(payload.profile) : "Not completed yet"}`;
 
-    const geminiResult = await callGeminiText(systemInstruction, userPrompt);
+    const geminiResult = (await callGeminiText(systemInstruction, userPrompt)) as {
+      recommendations?: Array<{ difficulty?: string; co2ReductionKg?: number | string } & Record<string, unknown>>;
+      [key: string]: unknown;
+    } | null;
     if (geminiResult && typeof geminiResult === "object") {
       // Validate or map difficulty keys to fit schema requirement (capitalized correctly)
       if (Array.isArray(geminiResult.recommendations)) {
-        geminiResult.recommendations = geminiResult.recommendations.map((rec: { difficulty?: string; co2ReductionKg?: number } & Record<string, unknown>) => {
+        geminiResult.recommendations = geminiResult.recommendations.map((rec) => {
           let difficulty: "Easy" | "Moderate" | "Challenging" = "Easy";
           const diffLower = String(rec.difficulty || "").toLowerCase();
           if (diffLower.startsWith("mod")) difficulty = "Moderate";
@@ -147,7 +150,7 @@ User Onboarding Profile Context: ${payload.profile ? JSON.stringify(payload.prof
           };
         });
       }
-      return jsonResponse(coachResponseSchema, geminiResult);
+      return jsonResponse(coachResponseSchema, geminiResult as import("@/features/coach/schemas").CoachResponse);
     }
   }
 
