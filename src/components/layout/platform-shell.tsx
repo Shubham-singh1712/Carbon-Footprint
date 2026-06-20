@@ -3,6 +3,7 @@ import { Bell, Sparkles } from "lucide-react";
 import { PlatformSidebar } from "@/components/layout/platform-sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { hasSupabaseConfig } from "@/lib/env";
 
 export function PlatformShell({ children }: { children: React.ReactNode }) {
@@ -25,6 +26,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle className="hidden md:inline-flex" />
             <Button className="hidden sm:inline-flex" variant="secondary">
               <Bell className="mr-2 h-4 w-4" aria-hidden="true" />
               Alerts

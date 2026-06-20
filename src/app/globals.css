@@ -221,6 +221,14 @@
   .range-slider:focus-visible::-webkit-slider-thumb {
     @apply ring-4 ring-ring;
   }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* ------------------------------------------------------------------ */

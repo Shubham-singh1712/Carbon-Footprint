@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { platformNavigation } from "@/config/navigation";
 import { BrandMark } from "@/components/layout/brand-mark";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { cn } from "@/lib/utils";
 
 export function PlatformSidebar() {
@@ -13,7 +12,7 @@ export function PlatformSidebar() {
   return (
     <aside className="glass-panel-strong sticky top-6 hidden h-[calc(100vh-3rem)] w-80 flex-col p-6 lg:flex overflow-hidden">
       <BrandMark className="mb-8 flex-shrink-0" />
-      <nav className="space-y-1.5 flex-1 overflow-y-auto pr-1 pb-4" aria-label="Platform navigation">
+      <nav className="space-y-1.5 flex-1 overflow-y-auto scrollbar-none pb-4" aria-label="Platform navigation">
         {platformNavigation.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
@@ -38,10 +37,6 @@ export function PlatformSidebar() {
       </nav>
 
       <div className="mt-auto space-y-4 flex-shrink-0 pt-4 border-t border-border/40">
-        <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
-          <span className="text-xs font-medium text-muted">Theme</span>
-          <ThemeToggle />
-        </div>
         <div className="rounded-[28px] border border-white/70 bg-white/80 p-5 dark:border-white/10 dark:bg-white/5">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">
             Live Insight
