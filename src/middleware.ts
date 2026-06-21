@@ -13,7 +13,64 @@ const protectedPaths = [
   "/impact",
 ];
 
+interface RateLimitRecord {
+  timestamps: number[];
+}
+
+const rateLimitStore = new Map<string, RateLimitRecord>();
+const LIMIT = 15;
+const WINDOW_MS = 60 * 1000;
+
+function getClientIdentifier(request: NextRequest): string {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader) {
+    return `session:${authHeader}`;
+  }
+
+  const token = request.cookies.get("sb-access-token")?.value;
+  if (token) {
+    return `session:${token}`;
+  }
+
+  const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
+  return `ip:${ip}`;
+}
+
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const isRateLimitedRoute = pathname === "/api/platform/coach" || pathname === "/api/platform/receipt";
+
+  if (isRateLimitedRoute) {
+    const key = `${getClientIdentifier(request)}:${pathname}`;
+    const now = Date.now();
+    const windowStart = now - WINDOW_MS;
+
+    const record = rateLimitStore.get(key) || { timestamps: [] };
+    record.timestamps = record.timestamps.filter((ts) => ts > windowStart);
+
+    if (record.timestamps.length >= LIMIT) {
+      const oldestTimestamp = record.timestamps[0];
+      const retryAfterSeconds = Math.max(1, Math.ceil((oldestTimestamp + WINDOW_MS - now) / 1000));
+
+      return new NextResponse(
+        JSON.stringify({
+          error: "Rate limit exceeded",
+          retryAfter: retryAfterSeconds,
+        }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": String(retryAfterSeconds),
+          },
+        }
+      );
+    }
+
+    record.timestamps.push(now);
+    rateLimitStore.set(key, record);
+  }
+
   const config = getSupabaseBrowserConfig();
 
   /* Demo mode — allow all routes */

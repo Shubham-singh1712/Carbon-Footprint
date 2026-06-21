@@ -7,7 +7,6 @@ import {
   Bot,
   Leaf,
   SendHorizonal,
-  Sparkles,
   ArrowDownRight,
   Clock,
   IndianRupee,
@@ -24,6 +23,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { staggerContainer, staggerItem } from "@/lib/motion";
+
+import { ReductionRoadmap } from "./reduction-roadmap";
+import { BehavioralInsights } from "./behavioral-insights";
 
 type ConversationMessage =
   | { role: "assistant"; content: string; meta?: CoachResponse }
@@ -144,13 +146,23 @@ export function CoachConsole() {
                       >
                         <div className="mb-3 flex items-center justify-between gap-2">
                           <p className="text-sm font-semibold">{rec.suggestedAction}</p>
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${difficultyColor[rec.difficulty]}`}>
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${difficultyColor[rec.difficulty as "Easy" | "Moderate" | "Challenging"]}`}>
                             {rec.difficulty}
                           </span>
                         </div>
                         <p className="mb-3 text-xs text-muted">
                           Currently: {rec.currentBehavior}
                         </p>
+                        
+                        {/* Explainability layer details inside the recommendation card if present */}
+                        {rec.whyGenerated && (
+                          <div className="mb-3 rounded-lg bg-accent/5 p-2.5 text-xs text-muted border border-accent/10">
+                            <span className="font-semibold text-accent uppercase tracking-wider text-[9px] block mb-1">AI Recommendation Context</span>
+                            <p className="leading-relaxed"><strong>Why generated:</strong> {rec.whyGenerated}</p>
+                            {rec.expectedImpact && <p className="mt-1 leading-relaxed"><strong>Expected Impact:</strong> {rec.expectedImpact}</p>}
+                          </div>
+                        )}
+
                         <div className="grid grid-cols-3 gap-2">
                           <div className="rounded-xl bg-accent-soft p-2 text-center">
                             <ArrowDownRight className="mx-auto h-3.5 w-3.5 text-accent" aria-hidden="true" />
@@ -255,37 +267,27 @@ export function CoachConsole() {
         </div>
       </Card>
 
-      <Card className="p-6">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
-          Suggested Prompts
-        </p>
-        <div className="mt-4 space-y-3">
-          {starterPrompts.map((item) => (
-            <button
-              key={item}
-              className="w-full rounded-[24px] border border-white/70 bg-white/72 px-4 py-4 text-left text-sm leading-7 text-foreground transition hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8"
-              onClick={() => setPrompt(item)}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-        <div className="mt-8 rounded-[28px] bg-gradient-to-br from-accent to-accent-strong p-5 text-white">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-white/80">
-              Weekly optimization
-            </p>
-          </div>
-          <h3 className="mt-3 text-2xl font-semibold">
-            CarbonTwin sees a 12% weekly reduction path.
-          </h3>
-          <p className="mt-3 text-sm leading-7 text-white/85">
-            The highest-confidence move is shifting two car-heavy commute blocks
-            to rail and consolidating one delivery order.
+      <div className="space-y-6">
+        <Card className="p-6">
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+            Suggested Prompts
           </p>
-        </div>
-      </Card>
+          <div className="mt-4 space-y-3">
+            {starterPrompts.map((item) => (
+              <button
+                key={item}
+                className="w-full rounded-[24px] border border-white/70 bg-white/72 px-4 py-4 text-left text-sm leading-7 text-foreground transition hover:bg-white dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/8"
+                onClick={() => setPrompt(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </Card>
+
+        <ReductionRoadmap />
+        <BehavioralInsights />
+      </div>
     </div>
   );
 }

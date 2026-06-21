@@ -10,6 +10,20 @@
  * Units: kg CO2e per month unless otherwise noted.
  */
 
+import {
+  VEHICLE_EMISSION_FACTORS,
+  PUBLIC_TRANSPORT_PER_KM,
+  ELECTRICITY_FACTOR,
+  APPLIANCE_MULTIPLIERS,
+  DIET_DAILY_BASELINE,
+  EXTRA_MEAT_MEAL_FACTOR,
+  FLIGHT_FACTOR,
+  TRAIN_FACTOR,
+  SHOPPING_FACTOR,
+  WORK_DAYS_PER_MONTH,
+  DAYS_PER_MONTH,
+  NATIONAL_MONTHLY_AVERAGE_KG,
+} from "@/constants";
 import type {
   TransportProfile,
   HomeProfile,
@@ -19,58 +33,6 @@ import type {
   UserOnboardingData,
   CarbonBreakdown,
 } from "@/stores/user-profile";
-
-/* ------------------------------------------------------------------ */
-/*  Emission factors                                                  */
-/* ------------------------------------------------------------------ */
-
-/** kg CO2e per km for various vehicle types */
-const VEHICLE_EMISSION_FACTORS: Record<TransportProfile["vehicleType"], number> = {
-  "car-petrol": 0.192,
-  "car-diesel": 0.171,
-  "car-electric": 0.053,
-  motorcycle: 0.103,
-  none: 0,
-};
-
-/** kg CO2e per km for public transport (weighted average bus + rail) */
-const PUBLIC_TRANSPORT_PER_KM = 0.089;
-
-/** kg CO2e per kWh of grid electricity (global average) */
-const ELECTRICITY_FACTOR = 0.42;
-
-/** Appliance usage multiplier on baseline electricity */
-const APPLIANCE_MULTIPLIERS: Record<HomeProfile["applianceUsage"], number> = {
-  low: 0.8,
-  moderate: 1.0,
-  high: 1.25,
-};
-
-/** kg CO2e per day for various diet types */
-const DIET_DAILY_BASELINE: Record<FoodProfile["dietType"], number> = {
-  vegan: 2.9,
-  vegetarian: 3.8,
-  flexitarian: 4.7,
-  omnivore: 5.6,
-};
-
-/** Additional kg CO2e per meat meal beyond diet baseline */
-const EXTRA_MEAT_MEAL_FACTOR = 1.4;
-
-/** kg CO2e per one-way domestic/short-haul flight */
-const FLIGHT_FACTOR = 255;
-
-/** kg CO2e per one-way train trip (avg 300 km) */
-const TRAIN_FACTOR = 12.6;
-
-/** kg CO2e per ₹1000 of shopping spend */
-const SHOPPING_FACTOR = 0.38;
-
-/** Working days per month */
-const WORK_DAYS_PER_MONTH = 22;
-
-/** Days per month */
-const DAYS_PER_MONTH = 30.44;
 
 /* ------------------------------------------------------------------ */
 /*  Category calculators                                              */
@@ -161,8 +123,6 @@ export function calculateMonthlyFootprint(data: UserOnboardingData): {
  * Score formula: 100 × (1 - user_monthly / baseline_monthly)
  * Clamped to [0, 100].
  */
-const NATIONAL_MONTHLY_AVERAGE_KG = 168;
-
 export function calculateCarbonHealthScore(monthlyKg: number): number {
   const ratio = monthlyKg / NATIONAL_MONTHLY_AVERAGE_KG;
   const raw = Math.round((1 - ratio) * 100);
@@ -198,6 +158,14 @@ export function energyEquivalentKwh(kgCO2e: number): number {
 /** Car kilometres equivalent */
 export function carKmEquivalent(kgCO2e: number): number {
   return Math.round(kgCO2e / 0.192);
+}
+
+/**
+ * Smartphone charges avoided equivalent.
+ * 1 full smartphone charge ≈ 0.0083 kg CO2e
+ */
+export function smartphoneChargesEquivalent(kgCO2e: number): number {
+  return Math.round(kgCO2e / 0.0083);
 }
 
 /* ------------------------------------------------------------------ */

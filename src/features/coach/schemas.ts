@@ -12,6 +12,10 @@ export const recommendationSchema = z.object({
   costSavings: z.string(),
   difficulty: z.enum(["Easy", "Moderate", "Challenging"]),
   timeRequired: z.string(),
+  whyGenerated: z.string().optional(),
+  dataInfluenced: z.string().optional(),
+  expectedImpact: z.string().optional(),
+  confidenceScore: z.number().optional(),
 });
 
 export const coachResponseSchema = z.object({
@@ -19,6 +23,10 @@ export const coachResponseSchema = z.object({
   insights: z.array(z.string()),
   nextActions: z.array(z.string()),
   recommendations: z.array(recommendationSchema).optional(),
+  metadata: z.object({
+    source: z.string(),
+    reason: z.string(),
+  }).optional(),
 });
 
 export type CoachPrompt = z.infer<typeof coachPromptSchema>;

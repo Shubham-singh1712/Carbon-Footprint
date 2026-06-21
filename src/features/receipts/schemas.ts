@@ -19,6 +19,10 @@ export const receiptAnalysisResponseSchema = z.object({
     impactBand: z.string(),
   }),
   insights: z.array(z.string()),
+  metadata: z.object({
+    source: z.string(),
+    reason: z.string(),
+  }).optional(),
 });
 
 export type ReceiptAnalysisRequest = z.infer<typeof receiptAnalysisRequestSchema>;

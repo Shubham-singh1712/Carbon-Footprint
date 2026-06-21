@@ -22,6 +22,10 @@ function buildCoachResponse(prompt: string) {
       costSavings: "₹1,200/month",
       difficulty: "Easy" as const,
       timeRequired: "Add 15 min to commute",
+      whyGenerated: "Commuting daily with petrol car accounts for the highest ratio of transport emissions; transit cuts this drastically.",
+      dataInfluenced: "User transport profile",
+      expectedImpact: "18 kg CO₂e carbon reduction per month",
+      confidenceScore: 92,
     });
   }
 
@@ -33,6 +37,10 @@ function buildCoachResponse(prompt: string) {
       costSavings: "₹800/month",
       difficulty: "Moderate" as const,
       timeRequired: "30 min meal prep",
+      whyGenerated: "Red meat production contributes a heavy footprint; plant-based meals drastically lower agricultural emissions.",
+      dataInfluenced: "User food profile",
+      expectedImpact: "12 kg CO₂e carbon reduction per month",
+      confidenceScore: 88,
     });
   }
 
@@ -44,6 +52,10 @@ function buildCoachResponse(prompt: string) {
       costSavings: "₹1,500/month",
       difficulty: "Easy" as const,
       timeRequired: "5 min setup",
+      whyGenerated: "AC units are high electricity consumers; raising target by 2°C cuts compressor load by 15%.",
+      dataInfluenced: "User home energy profile",
+      expectedImpact: "22 kg CO₂e carbon reduction per month",
+      confidenceScore: 95,
     });
   }
 
@@ -57,6 +69,10 @@ function buildCoachResponse(prompt: string) {
         costSavings: "₹1,200/month",
         difficulty: "Easy" as const,
         timeRequired: "Add 15 min to commute",
+        whyGenerated: "Commuting via petrol car daily generates significant CO₂; public transit cuts this drastically.",
+        dataInfluenced: "User transport profile",
+        expectedImpact: "18 kg CO₂e carbon reduction per month",
+        confidenceScore: 92,
       },
       {
         currentBehavior: "High meat consumption",
@@ -65,6 +81,10 @@ function buildCoachResponse(prompt: string) {
         costSavings: "₹800/month",
         difficulty: "Moderate" as const,
         timeRequired: "30 min meal prep",
+        whyGenerated: "Red meat production contributes a heavy footprint; plant-based meals drastically lower agricultural emissions.",
+        dataInfluenced: "User food profile",
+        expectedImpact: "12 kg CO₂e carbon reduction per month",
+        confidenceScore: 88,
       },
       {
         currentBehavior: "Standby power always on",
@@ -73,6 +93,10 @@ function buildCoachResponse(prompt: string) {
         costSavings: "₹400/month",
         difficulty: "Easy" as const,
         timeRequired: "One-time 10 min setup",
+        whyGenerated: "Standby loads consume passive grid electricity; smart plugs automate this to zero.",
+        dataInfluenced: "User home energy profile",
+        expectedImpact: "8 kg CO₂e carbon reduction per month",
+        confidenceScore: 95,
       },
     );
   }
@@ -122,37 +146,62 @@ You MUST respond with a raw JSON object matching this structure:
       "co2ReductionKg": 18,
       "costSavings": "e.g. ₹1,200/month",
       "difficulty": "Easy", // MUST be Easy, Moderate, or Challenging
-      "timeRequired": "e.g. 15 mins daily"
+      "timeRequired": "e.g. 15 mins daily",
+      "whyGenerated": "e.g. Commute makes up 72% of your transport emissions.",
+      "dataInfluenced": "e.g. Onboarding transport questionnaire",
+      "expectedImpact": "e.g. 18 kg CO2e reduced monthly",
+      "confidenceScore": 94
     }
   ]
 }
-Ensure the recommendations are realistic, and reflect their active footprint categories. Keep response strictly formatted as valid JSON. Make sure recommendations difficulty matches the schema.`;
+Ensure the recommendations are realistic, and reflect their active footprint categories. Keep response strictly formatted as valid JSON. Make sure recommendations difficulty matches the schema. Includes explainability metrics in every recommendation item.`;
 
     const userPrompt = `User Query: "${payload.prompt}"
 User Onboarding Profile Context: ${payload.profile ? JSON.stringify(payload.profile) : "Not completed yet"}`;
 
-    const geminiResult = (await callGeminiText(systemInstruction, userPrompt)) as {
-      recommendations?: Array<{ difficulty?: string; co2ReductionKg?: number | string } & Record<string, unknown>>;
-      [key: string]: unknown;
-    } | null;
-    if (geminiResult && typeof geminiResult === "object") {
-      // Validate or map difficulty keys to fit schema requirement (capitalized correctly)
-      if (Array.isArray(geminiResult.recommendations)) {
-        geminiResult.recommendations = geminiResult.recommendations.map((rec) => {
-          let difficulty: "Easy" | "Moderate" | "Challenging" = "Easy";
-          const diffLower = String(rec.difficulty || "").toLowerCase();
-          if (diffLower.startsWith("mod")) difficulty = "Moderate";
-          else if (diffLower.startsWith("chal") || diffLower.startsWith("hard")) difficulty = "Challenging";
-          return {
-            ...rec,
-            co2ReductionKg: Number(rec.co2ReductionKg) || 0,
-            difficulty,
-          };
-        });
+    try {
+      const geminiResult = (await callGeminiText(systemInstruction, userPrompt)) as {
+        recommendations?: Array<{ difficulty?: string; co2ReductionKg?: number | string } & Record<string, unknown>>;
+        [key: string]: unknown;
+      } | null;
+
+      if (geminiResult && typeof geminiResult === "object") {
+        if (Array.isArray(geminiResult.recommendations)) {
+          geminiResult.recommendations = geminiResult.recommendations.map((rec) => {
+            let difficulty: "Easy" | "Moderate" | "Challenging" = "Easy";
+            const diffLower = String(rec.difficulty || "").toLowerCase();
+            if (diffLower.startsWith("mod")) difficulty = "Moderate";
+            else if (diffLower.startsWith("chal") || diffLower.startsWith("hard")) difficulty = "Challenging";
+            return {
+              ...rec,
+              co2ReductionKg: Number(rec.co2ReductionKg) || 0,
+              difficulty,
+            };
+          });
+        }
+        return jsonResponse(coachResponseSchema, {
+          ...geminiResult,
+          metadata: {
+            source: "gemini",
+            reason: "Success",
+          },
+        } as import("@/features/coach/schemas").CoachResponse);
+      } else {
+        console.warn("[CarbonTwin AI Coach] Gemini call returned null or invalid structure. Falling back to local mock parsing.");
       }
-      return jsonResponse(coachResponseSchema, geminiResult as import("@/features/coach/schemas").CoachResponse);
+    } catch (err) {
+      console.error("[CarbonTwin AI Coach Error] Failed during Gemini generation:", err);
     }
+  } else {
+    console.warn("[CarbonTwin AI Coach] GEMINI_API_KEY is not set in environment. Falling back to local mock parsing.");
   }
 
-  return jsonResponse(coachResponseSchema, buildCoachResponse(payload.prompt));
+  const fallback = buildCoachResponse(payload.prompt);
+  return jsonResponse(coachResponseSchema, {
+    ...fallback,
+    metadata: {
+      source: "fallback",
+      reason: "Gemini unavailable",
+    },
+  });
 }

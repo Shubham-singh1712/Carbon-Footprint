@@ -16,8 +16,8 @@ import {
 } from "recharts";
 import { typedFetch } from "@/lib/api/client";
 import { dashboardOverviewSchema } from "@/features/dashboard/schemas";
-import { CarbonHealthGauge } from "@/features/dashboard/components/carbon-health-gauge";
 import { AnnualProjection } from "@/features/dashboard/components/annual-projection";
+import { CarbonScoreCard } from "@/features/dashboard/components/carbon-score-card";
 import { KpiCard } from "@/components/shared/kpi-card";
 import { SkeletonCard } from "@/components/shared/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,10 @@ import { Progress } from "@/components/ui/progress";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 
 import { useUserProfile } from "@/stores/user-profile";
+import { useCommunityImpact } from "@/hooks/use-sustainability";
+import { smartphoneChargesEquivalent } from "@/lib/carbon-engine";
+import { Trees, Droplets, Zap, Smartphone, Trophy, Users } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 
 const chartColors = ["#0f9f6f", "#45c48a", "#92ddb1", "#c7f0d6", "#d8efe1"];
 
@@ -57,13 +61,21 @@ export function DashboardOverview() {
     },
   });
 
-  const data = overviewQuery.data;
+  const impactQuery = useCommunityImpact();
 
-  if (!data) {
+  const data = overviewQuery.data;
+  const impactData = impactQuery.data;
+
+  if (!data || !impactData) {
     return (
       <div className="space-y-6">
-        <div className="grid gap-4 xl:grid-cols-3">
+        <div className="grid gap-4 xl:grid-cols-4">
           <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <div className="grid gap-6 xl:grid-cols-2">
           <SkeletonCard />
           <SkeletonCard />
         </div>
@@ -85,17 +97,7 @@ export function DashboardOverview() {
       {/* Carbon Health Score + KPIs */}
       <div className="grid gap-4 xl:grid-cols-4">
         <motion.div variants={staggerItem}>
-          <Card className="flex flex-col items-center justify-center p-6">
-            <p className="mb-4 font-mono text-xs uppercase tracking-[0.18em] text-muted">
-              Carbon Health Score
-            </p>
-            <CarbonHealthGauge score={data.healthScore} size={160} />
-            <p className="mt-3 text-sm leading-6 text-muted">
-              {data.healthScore >= 60
-                ? "You're performing above average!"
-                : "Room for improvement — check AI Coach."}
-            </p>
-          </Card>
+          <CarbonScoreCard score={data.healthScore} />
         </motion.div>
         {data.summary.map((item) => (
           <motion.div key={item.label} variants={staggerItem}>
@@ -203,10 +205,15 @@ export function DashboardOverview() {
         </Card>
       </motion.div>
 
-      {/* Annual Projection */}
-      <motion.div variants={staggerItem}>
-        <AnnualProjection />
-      </motion.div>
+      {/* Projections & Environmental Impact */}
+      <div className="grid gap-6 xl:grid-cols-2">
+        <motion.div variants={staggerItem}>
+          <AnnualProjection />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <CommunityImpactCard />
+        </motion.div>
+      </div>
 
       {/* Milestones + Coach Brief */}
       <motion.div className="grid gap-6 xl:grid-cols-[1.25fr_0.95fr]" variants={staggerItem}>
@@ -252,5 +259,97 @@ export function DashboardOverview() {
         </Card>
       </motion.div>
     </motion.div>
+  );
+}
+
+export function CommunityImpactCard() {
+  const { data: impactData } = useCommunityImpact();
+
+  if (!impactData) return null;
+
+  const smartphoneCharges = smartphoneChargesEquivalent(impactData.totalReductionKg);
+
+  return (
+    <Card className="p-6 h-full flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
+              Community Impact
+            </p>
+            <h3 className="mt-2 text-2xl font-semibold text-foreground">
+              {formatNumber(impactData.totalReductionKg)} kg CO₂e Saved
+            </h3>
+          </div>
+          <Badge variant="success" className="flex items-center gap-1.5 shrink-0 h-fit">
+            <Trophy className="h-3 w-3" />
+            Rank #{impactData.communityRank}
+          </Badge>
+        </div>
+
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Your collective climate action has achieved these environmental equivalents:
+        </p>
+
+        <div className="mt-6 grid grid-cols-2 gap-4">
+          {/* Trees Equivalent */}
+          <div className="flex items-center gap-3 rounded-[24px] border border-white/80 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100/50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+              <Trees className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {formatNumber(impactData.treesEquivalent)}
+              </p>
+              <p className="text-xs text-muted">Trees Saved</p>
+            </div>
+          </div>
+
+          {/* Water Saved */}
+          <div className="flex items-center gap-3 rounded-[24px] border border-white/80 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100/50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+              <Droplets className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {formatNumber(impactData.waterSavedLitres)} L
+              </p>
+              <p className="text-xs text-muted">Water Saved</p>
+            </div>
+          </div>
+
+          {/* Energy Saved */}
+          <div className="flex items-center gap-3 rounded-[24px] border border-white/80 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100/50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+              <Zap className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {formatNumber(impactData.energySavedKwh)} kWh
+              </p>
+              <p className="text-xs text-muted">Energy Saved</p>
+            </div>
+          </div>
+
+          {/* Phone Charges */}
+          <div className="flex items-center gap-3 rounded-[24px] border border-white/80 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100/50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+              <Smartphone className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {formatNumber(smartphoneCharges)}
+              </p>
+              <p className="text-xs text-muted">Phone Charges</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 flex items-center gap-2 text-xs text-muted border-t border-dashed border-white/80 dark:border-white/10 pt-4">
+        <Users className="h-3.5 w-3.5" />
+        <span>Jointly offset by {formatNumber(impactData.totalMembers)} community members</span>
+      </div>
+    </Card>
   );
 }

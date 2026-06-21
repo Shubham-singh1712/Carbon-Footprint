@@ -44,40 +44,55 @@ Return a raw JSON object with this exact structure:
     "A general recommendation."
   ]
 }`;
-    const ocrResult = (await callGeminiVision(payload.image, "image/jpeg", prompt)) as {
-      category?: string;
-      estimatedKg?: number | string;
-      amount?: number | string;
-      confidence?: number | string;
-      vendor?: string;
-      insights?: string[];
-      [key: string]: unknown;
-    } | null;
-    if (ocrResult && typeof ocrResult === "object") {
-      let category = ocrResult.category || "shopping";
-      if (!["food", "mobility", "home", "shopping", "digital"].includes(category)) {
-        category = "shopping";
-      }
-      const amountVal = Number(ocrResult.amount || payload.amount) || 0;
-      const estimatedKg = Number(ocrResult.estimatedKg) || Number((amountVal * multipliers[category as keyof typeof multipliers]).toFixed(1));
-      
-      return jsonResponse(
-        receiptAnalysisResponseSchema,
-        {
-          estimatedKg,
-          confidence: Number(ocrResult.confidence) || 85,
-          normalized: {
-            vendor: String(ocrResult.vendor || payload.vendor),
-            category,
-            spend: amountVal,
-            impactBand: estimatedKg > 18 ? "High" : estimatedKg > 10 ? "Medium" : "Low",
-          },
-          insights: Array.isArray(ocrResult.insights) ? ocrResult.insights : [
-            "Bundle repeat purchases to reduce delivery and packaging overhead.",
-            "Shift one spend-heavy category to a lower-impact alternative this week."
-          ],
+    try {
+      const ocrResult = (await callGeminiVision(payload.image, "image/jpeg", prompt)) as {
+        category?: string;
+        estimatedKg?: number | string;
+        amount?: number | string;
+        confidence?: number | string;
+        vendor?: string;
+        insights?: string[];
+        [key: string]: unknown;
+      } | null;
+
+      if (ocrResult && typeof ocrResult === "object") {
+        let category = ocrResult.category || "shopping";
+        if (!["food", "mobility", "home", "shopping", "digital"].includes(category)) {
+          category = "shopping";
         }
-      );
+        const amountVal = Number(ocrResult.amount || payload.amount) || 0;
+        const estimatedKg = Number(ocrResult.estimatedKg) || Number((amountVal * multipliers[category as keyof typeof multipliers]).toFixed(1));
+        
+        return jsonResponse(
+          receiptAnalysisResponseSchema,
+          {
+            estimatedKg,
+            confidence: Number(ocrResult.confidence) || 85,
+            normalized: {
+              vendor: String(ocrResult.vendor || payload.vendor),
+              category,
+              spend: amountVal,
+              impactBand: estimatedKg > 18 ? "High" : estimatedKg > 10 ? "Medium" : "Low",
+            },
+            insights: Array.isArray(ocrResult.insights) ? ocrResult.insights : [
+              "Bundle repeat purchases to reduce delivery and packaging overhead.",
+              "Shift one spend-heavy category to a lower-impact alternative this week."
+            ],
+            metadata: {
+              source: "gemini",
+              reason: "Success",
+            },
+          }
+        );
+      } else {
+        console.warn("[CarbonTwin Receipt Scanner] Gemini Vision returned null or invalid structure. Falling back to local mock parsing.");
+      }
+    } catch (err) {
+      console.error("[CarbonTwin Receipt Scanner Error] Failed during Gemini Vision API execution:", err);
+    }
+  } else {
+    if (payload.image) {
+      console.warn("[CarbonTwin Receipt Scanner] GEMINI_API_KEY is not set in environment. Falling back to local mock parsing.");
     }
   }
 
@@ -100,6 +115,10 @@ Return a raw JSON object with this exact structure:
         "Shift one spend-heavy category to a lower-impact alternative this week.",
         "Receipts become more valuable when paired with simulator scenarios and coaching prompts.",
       ],
+      metadata: {
+        source: "fallback",
+        reason: "Gemini unavailable",
+      },
     },
   );
 }

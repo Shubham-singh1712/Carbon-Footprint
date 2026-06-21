@@ -12,9 +12,11 @@ import {
   waterSavedLitres,
   energyEquivalentKwh,
   carKmEquivalent,
+  smartphoneChargesEquivalent,
   getScoreColor,
   getScoreLabel,
 } from "@/lib/carbon-engine";
+
 
 /* ------------------------------------------------------------------ */
 /*  Transport                                                         */
@@ -214,6 +216,10 @@ describe("equivalency functions", () => {
 
   it("carKmEquivalent returns positive for positive input", () => {
     expect(carKmEquivalent(100)).toBeGreaterThan(0);
+  });
+
+  it("smartphoneChargesEquivalent returns positive for positive input", () => {
+    expect(smartphoneChargesEquivalent(100)).toBeGreaterThan(0);
   });
 });
 
