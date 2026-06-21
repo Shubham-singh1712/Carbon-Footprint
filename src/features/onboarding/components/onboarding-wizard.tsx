@@ -33,6 +33,8 @@ import type {
   ShoppingProfile,
 } from "@/stores/user-profile";
 import { slideInFromRight } from "@/lib/motion";
+import { SelectField } from "./select-field";
+import { SliderField } from "./slider-field";
 
 /* ------------------------------------------------------------------ */
 /*  Step config                                                       */
@@ -45,91 +47,6 @@ const steps = [
   { id: "travel", label: "Travel", icon: Plane },
   { id: "shopping", label: "Shopping", icon: ShoppingBag },
 ] as const;
-
-/* ------------------------------------------------------------------ */
-/*  Select helper component                                           */
-/* ------------------------------------------------------------------ */
-
-function SelectField({
-  label,
-  id,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  id: string;
-  value: string;
-  options: { value: string; label: string }[];
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-2 block text-sm font-medium text-foreground">
-        {label}
-      </label>
-      <select
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-11 w-full rounded-2xl border border-border bg-input-bg px-4 text-sm text-foreground outline-none focus:border-accent focus:ring-4 focus:ring-ring"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Slider helper component                                           */
-/* ------------------------------------------------------------------ */
-
-function SliderField({
-  label,
-  id,
-  value,
-  min,
-  max,
-  step = 1,
-  unit,
-  onChange,
-}: {
-  label: string;
-  id: string;
-  value: number;
-  min: number;
-  max: number;
-  step?: number;
-  unit: string;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div>
-      <div className="mb-3 flex items-center justify-between">
-        <label htmlFor={id} className="text-sm font-medium text-foreground">
-          {label}
-        </label>
-        <span className="font-mono text-sm text-muted">
-          {value} {unit}
-        </span>
-      </div>
-      <input
-        id={id}
-        type="range"
-        className="range-slider"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-      />
-    </div>
-  );
-}
 
 /* ------------------------------------------------------------------ */
 /*  Wizard component                                                  */
@@ -175,6 +92,7 @@ export function OnboardingWizard() {
   /* Result screen */
   if (showResult) {
     const score = profile.carbonHealthScore;
+    const annualFootprintTons = ((profile.monthlyFootprintKg * 12) / 1000).toFixed(1);
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -206,7 +124,7 @@ export function OnboardingWizard() {
               <div className="rounded-2xl border border-border bg-card p-4">
                 <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted">Annual</p>
                 <p className="mt-2 text-2xl font-semibold text-foreground">
-                  {(profile.monthlyFootprintKg * 12 / 1000).toFixed(1)} <span className="text-sm">t CO₂e</span>
+                  {annualFootprintTons} <span className="text-sm">t CO₂e</span>
                 </p>
               </div>
             </div>

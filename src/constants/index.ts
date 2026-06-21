@@ -103,3 +103,13 @@ export const BADGE_REQUIREMENTS = {
   KITCHEN_SWAP_ITEMS: 5,
   MINIMUM_STREAK_DAYS: 7,
 } as const;
+
+/**
+ * Unified UI theme colors for carbon charts
+ */
+export const CHART_COLORS = {
+  PRIMARY: "#0f9f6f",
+  PRIMARY_LIGHT: "#45c48a",
+  ACCENT_MUTED: "#8fbca5",
+  PIE_PALETTE: ["#0f9f6f", "#45c48a", "#92ddb1", "#c7f0d6", "#d8efe1"],
+} as const;

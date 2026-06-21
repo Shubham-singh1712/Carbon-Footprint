@@ -20,6 +20,7 @@ import { useUserProfile } from "@/stores/user-profile";
 import { toast } from "sonner";
 import { Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CHART_COLORS } from "@/constants";
 
 type ScenarioState = {
   commuteDays: number;
@@ -109,6 +110,14 @@ export function WhatIfSimulator() {
     ];
   }, [comparison, scenario]);
 
+  const { treeEquiv, carKmEquiv } = useMemo(() => {
+    const savings = comparison.savings;
+    return {
+      treeEquiv: treesEquivalent(savings > 0 ? savings * 12 : 0),
+      carKmEquiv: carKmEquivalent(savings > 0 ? savings : 0),
+    };
+  }, [comparison.savings]);
+
   return (
     <motion.div
       className="grid gap-6 xl:grid-cols-[1.1fr_0.95fr]"
@@ -191,7 +200,7 @@ export function WhatIfSimulator() {
           {/* Impact equivalencies */}
           <div className="mt-6 grid gap-3 grid-cols-3">
             <div className="rounded-xl bg-accent-soft p-3 text-center">
-              <p className="text-lg font-bold text-accent">{treesEquivalent(comparison.savings > 0 ? comparison.savings * 12 : 0)}</p>
+              <p className="text-lg font-bold text-accent">{treeEquiv}</p>
               <p className="text-[10px] text-muted">Trees/year</p>
             </div>
             <div className="rounded-xl bg-accent-soft p-3 text-center">
@@ -199,7 +208,7 @@ export function WhatIfSimulator() {
               <p className="text-[10px] text-muted">Annual savings</p>
             </div>
             <div className="rounded-xl bg-accent-soft p-3 text-center">
-              <p className="text-lg font-bold text-accent">{formatNumber(carKmEquivalent(comparison.savings > 0 ? comparison.savings : 0))}</p>
+              <p className="text-lg font-bold text-accent">{formatNumber(carKmEquiv)}</p>
               <p className="text-[10px] text-muted">Car km equiv</p>
             </div>
           </div>
@@ -231,8 +240,8 @@ export function WhatIfSimulator() {
                 <XAxis dataKey="name" stroke="#6c7d74" tickLine={false} axisLine={false} />
                 <YAxis stroke="#6c7d74" tickLine={false} axisLine={false} />
                 <Tooltip />
-                <Bar dataKey="baseline" fill="#8fbca5" radius={[8, 8, 0, 0]} name="Baseline" />
-                <Bar dataKey="modeled" fill="#0f9f6f" radius={[8, 8, 0, 0]} name="Modeled" />
+                <Bar dataKey="baseline" fill={CHART_COLORS.ACCENT_MUTED} radius={[8, 8, 0, 0]} name="Baseline" />
+                <Bar dataKey="modeled" fill={CHART_COLORS.PRIMARY} radius={[8, 8, 0, 0]} name="Modeled" />
               </BarChart>
             </ResponsiveContainer>
           </div>

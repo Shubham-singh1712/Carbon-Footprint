@@ -30,8 +30,9 @@ import { useCommunityImpact } from "@/hooks/use-sustainability";
 import { smartphoneChargesEquivalent } from "@/lib/carbon-engine";
 import { Trees, Droplets, Zap, Smartphone, Trophy, Users } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
+import { CHART_COLORS } from "@/constants";
 
-const chartColors = ["#0f9f6f", "#45c48a", "#92ddb1", "#c7f0d6", "#d8efe1"];
+const chartColors = CHART_COLORS.PIE_PALETTE;
 
 export function DashboardOverview() {
   const profile = useUserProfile((state) => state.profile);
@@ -137,8 +138,8 @@ export function DashboardOverview() {
               <AreaChart data={data.trend}>
                 <defs>
                   <linearGradient id="actualFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0f9f6f" stopOpacity={0.34} />
-                    <stop offset="95%" stopColor="#0f9f6f" stopOpacity={0.02} />
+                    <stop offset="5%" stopColor={CHART_COLORS.PRIMARY} stopOpacity={0.34} />
+                    <stop offset="95%" stopColor={CHART_COLORS.PRIMARY} stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="rgba(16,34,26,0.08)" vertical={false} />
@@ -156,7 +157,7 @@ export function DashboardOverview() {
                 <Area
                   type="monotone"
                   dataKey="target"
-                  stroke="#8fbca5"
+                  stroke={CHART_COLORS.ACCENT_MUTED}
                   strokeWidth={2}
                   fillOpacity={0}
                   name="Target"
@@ -164,7 +165,7 @@ export function DashboardOverview() {
                 <Area
                   type="monotone"
                   dataKey="actual"
-                  stroke="#0f9f6f"
+                  stroke={CHART_COLORS.PRIMARY}
                   strokeWidth={3}
                   fill="url(#actualFill)"
                   name="Actual"

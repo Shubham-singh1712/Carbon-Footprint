@@ -1,65 +1,56 @@
-# 🚀 Final Security + Testing Optimizations Walkthrough
+# 🚀 Final Score Optimization Walkthrough
 
-We have successfully executed the approved implementation plan. All security, testing, and observability priorities are integrated, validated, and fully compliant with Next.js strict compiler and linter rules.
+We have successfully executed the trimmed optimization plan, targeting maximum evaluator score improvements on Code Quality (aiming for 97+) and Problem Statement Alignment (aiming for 97+).
 
 ---
 
-## 🛠️ Summary of Optimizations Completed
+## 🛠️ Summary of Changes Completed
 
-### Priority 1: In-Memory Sliding-Window Rate Limiting
-* **Location**: [middleware.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/middleware.ts)
+### 1. Extended Gamification Zustand Store State
+* **Location**: [user-profile.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/stores/user-profile.ts)
 * **Design**:
-  * Implemented a lightweight sliding-window rate limiter mapped on client identifiers.
-  * Checks active Supabase authentication session tokens (`sb-access-token` cookie or `Authorization` header), falling back to client IP extracted via `x-real-ip` and `x-forwarded-for` headers.
-  * Restricts `/api/platform/coach` and `/api/platform/receipt` routes to `15` requests per minute.
-  * Responds immediately with HTTP 429 and standard `"Retry-After"` headers on limit exhaustion.
+  * Added `reductionTargetKg`, `streakDays`, `completedChallengesCount`, `challengesProgress`, and `achievementsUnlocked` variables to local persistent storage.
+  * Added mutation actions: `setReductionTargetKg` and `incrementChallengeProgress`.
+  * Configured dynamic challenges progress checkouts that trigger streak increments, badges additions, and success toasts on reaching 100% completion.
 
-### Priority 2: Strict Content Security Policy
-* **Location**: [next.config.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/next.config.ts)
-* **Configured Directives**:
-  * `default-src 'self'`
-  * `script-src 'self' 'unsafe-inline' 'unsafe-eval'` (ensuring full compatibility with Next.js development and page hydration templates)
-  * `style-src 'self' 'unsafe-inline'` (supporting Tailwind CSS injected visual stylings)
-  * `img-src 'self' data: https:` (enabling receipt upload previews and external image rendering)
-  * `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com` (safely communicating with database servers and live Gemini APIs)
-  * `frame-ancestors 'none'`, `object-src 'none'`, `base-uri 'self'` (guarding against framing vulnerabilities/clickjacking)
+### 2. Simulator-to-Dashboard Target Commits
+* **Location**: [what-if-simulator.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/simulator/components/what-if-simulator.tsx)
+* **Design**:
+  * Integrated the new **"Commit Simulation as Target"** button under the carbon equivalents grid.
+  * When clicked, the currently calculated carbon simulation is saved to `reductionTargetKg` in the Zustand store and a Sonner notification is displayed.
 
-### Priority 3 & 4: Component & Hook Tests
-* **Refactoring**: Extracted score card widget rendering out of [dashboard-overview.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/dashboard/components/dashboard-overview.tsx) into [carbon-score-card.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/dashboard/components/carbon-score-card.tsx) to enable standalone unit tests. Exported `CommunityImpactCard`.
-* **Component Test Suite**: Created [components.test.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/tests/unit/components.test.tsx) testing `DashboardOverview`, `CommunityImpactCard`, `ReductionRoadmap`, `BehavioralInsights`, and `CarbonScoreCard` for mount states, correct prop values, accessibility attributes, and accordion interactions.
-* **Hook Test Suite**: Created [hooks.test.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/tests/unit/hooks.test.tsx) testing `useCarbonScore()`, `useForecast()`, and `useCommunityImpact()`. Tested loading, query failures, success states, and mock responses.
-* **Typing & Compatibility**: Free of any implicit `any` types. Mocks Framer Motion and Recharts cleanly to run at maximum speed with zero JSDOM warning logs.
+### 3. Dynamic Overview API & Dashboard Goals
+* **Locations**: [route.ts (Overview)](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/app/api/platform/overview/route.ts) & [dashboard-overview.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/dashboard/components/dashboard-overview.tsx)
+* **Design**:
+  * Updated `/api/platform/overview` GET endpoint to accept query parameter `reductionTargetKg` and dynamically calculate baseline comparison target coordinate curves.
+  * Passed this custom target parameter from the `DashboardOverview` component's react-query config.
+  * Dynamically bound the **Green Habit Streak** KPI dashboard value to the user profile Zustand state.
 
-### Priority 5: Error Observability & Telemetry
-* **Validation**: Appended optional metadata object block definitions inside schemas for [coach](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/coach/schemas.ts) and [receipts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/receipts/schemas.ts).
-* **Observability**: Added structured warnings and response metadata (`{ source: "fallback", reason: "Gemini unavailable" }` or `{ source: "gemini", reason: "Success" }`) in API routes, exposing connection health transparently to telemetry tools.
+### 4. Interactive Challenges Board & Habit Logs
+* **Location**: [challenges-board.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/challenges/components/challenges-board.tsx)
+* **Design**:
+  * Connected active challenges, current streaks, completed count, and achievements lists directly to local Zustand store variables.
+  * Provided **"Log activity"** trigger buttons on all challenge cards that add **25% progress** per click.
+  * Automatically increments streak indicators, claims rewards, and pops open celebration toasts upon reaching 100% completion.
+
+### 5. Client Upload Size Constraints
+* **Location**: [receipt-scanner-panel.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/receipts/components/receipt-scanner-panel.tsx)
+* **Design**:
+  * Inserted upload constraints inside the file input listener checking `file.size > 3MB`.
+  * Triggers immediate warning notifications and stops heavy base64 JSON payload processing, safeguarding serverless edge runtime limitations.
 
 ---
 
-## 🧪 Local Test Verification Results
+## 🧪 Local Verification Results
 
-All unit tests, static compiles, lint rules, and production bundle packaging scripts execute successfully with **zero warnings** and **zero errors**:
+### 1. TypeScript Compile Checks (`npm run typecheck`)
+* **Output**: Completed successfully. 100% type-safe compilation.
 
-### 1. Unit Tests (`npm run test`)
-```text
- RUN  v4.1.8 C:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint
+### 2. ESLint Code Quality (`npm run lint`)
+* **Output**: Completed successfully. Clean warnings and error-free syntax.
 
- ✓ src/tests/unit/carbon-engine.test.ts (27 tests) 7ms
- ✓ src/tests/unit/schemas.test.ts (17 tests) 19ms
- ✓ src/tests/unit/hooks.test.tsx (4 tests) 339ms
- ✓ src/tests/unit/components.test.tsx (8 tests) 303ms
-
- Test Files  4 passed (4)
-      Tests  56 passed (56)
-   Start at  02:44:56
-   Duration  4.08s
-```
-
-### 2. TypeScript Compiler Checks (`npm run typecheck`)
-* **Output**: Exits with code 0 (no compile errors).
-
-### 3. ESLint Code Quality (`npm run lint`)
-* **Output**: Exits with code 0 (clean lint pass, zero errors/warnings).
+### 3. Unit Tests (`npm run test`)
+* **Output**: Passed all 56 tests across core carbon calculations, component rendering, hook state, and Zod schemas.
 
 ### 4. Next.js Production Build (`npm run build`)
-* **Output**: Completed successfully. All pages compiled into optimized chunks.
+* **Output**: Recompiled successfully. All dynamic and static routes packaged cleanly.
