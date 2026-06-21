@@ -85,7 +85,7 @@ export function calculateTravelFootprint(travel: TravelProfile): number {
  * Calculate monthly shopping emissions in kg CO2e.
  */
 export function calculateShoppingFootprint(shopping: ShoppingProfile): number {
-  return Math.round((shopping.monthlySpend / 1000) * SHOPPING_FACTOR * 1000) / 1000 * 10 / 10;
+  return Math.round((shopping.monthlySpend / 1000) * SHOPPING_FACTOR * 10) / 10;
 }
 
 /* ------------------------------------------------------------------ */

@@ -1,24 +1,36 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { Award, Flame } from "lucide-react";
-import { typedFetch } from "@/lib/api/client";
-import { challengesSchema } from "@/features/challenges/schemas";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useUserProfile } from "@/stores/user-profile";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function ChallengesBoard() {
-  const challengesQuery = useQuery({
-    queryKey: ["challenges-board"],
-    queryFn: () =>
-      typedFetch("/api/platform/challenges", { method: "GET", cache: "no-store" }, challengesSchema),
-  });
+  const streakDays = useUserProfile((state) => state.streakDays);
+  const completed = useUserProfile((state) => state.completedChallengesCount);
+  const challengesProgress = useUserProfile((state) => state.challengesProgress);
+  const achievements = useUserProfile((state) => state.achievementsUnlocked);
+  const incrementChallengeProgress = useUserProfile((state) => state.incrementChallengeProgress);
 
-  if (!challengesQuery.data) {
-    return <Card className="p-6 text-sm text-muted">Loading challenges...</Card>;
-  }
-
-  const data = challengesQuery.data;
+  const activeChallenges = [
+    {
+      title: "Low-carbon commute week",
+      description: "Complete 4 commute windows under 1.5 kg CO2e.",
+      reward: "Transit Trailblazer badge",
+    },
+    {
+      title: "Kitchen footprint reset",
+      description: "Swap 5 high-impact items for lower-emission alternatives.",
+      reward: "Planet Plate streak boost",
+    },
+    {
+      title: "Home efficiency sprint",
+      description: "Automate lighting, standby power, and climate timings.",
+      reward: "Smart Home Saver badge",
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -32,7 +44,7 @@ export function ChallengesBoard() {
               <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
                 Current streak
               </p>
-              <p className="text-3xl font-semibold text-foreground">{data.streakDays} days</p>
+              <p className="text-3xl font-semibold text-foreground">{streakDays} days</p>
             </div>
           </div>
         </Card>
@@ -45,7 +57,7 @@ export function ChallengesBoard() {
               <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">
                 Achievements unlocked
               </p>
-              <p className="text-3xl font-semibold text-foreground">{data.completed}</p>
+              <p className="text-3xl font-semibold text-foreground">{completed}</p>
             </div>
           </div>
         </Card>
@@ -57,20 +69,47 @@ export function ChallengesBoard() {
             Active challenges
           </p>
           <div className="mt-5 space-y-5">
-            {data.active.map((challenge) => (
-              <div key={challenge.title} className="rounded-[24px] border border-white/70 bg-white/80 dark:border-white/10 dark:bg-white/5 p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h3 className="font-semibold text-foreground">{challenge.title}</h3>
-                    <p className="mt-1 text-sm leading-6 text-muted">{challenge.description}</p>
+            {activeChallenges.map((challenge) => {
+              const progress = challengesProgress[challenge.title] ?? 0;
+              return (
+                <div key={challenge.title} className="rounded-[24px] border border-white/70 bg-white/80 dark:border-white/10 dark:bg-white/5 p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="font-semibold text-foreground">{challenge.title}</h3>
+                      <p className="mt-1 text-sm leading-6 text-muted">{challenge.description}</p>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-accent bg-accent-soft px-2.5 py-1 rounded-full shrink-0">
+                      {challenge.reward}
+                    </span>
                   </div>
-                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
-                    {challenge.reward}
-                  </span>
+                  
+                  <div className="mt-6 flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="mb-2 flex items-center justify-between text-xs text-muted">
+                        <span>Progress</span>
+                        <span>{progress}%</span>
+                      </div>
+                      <Progress value={progress} />
+                    </div>
+                    
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        incrementChallengeProgress(challenge.title, 25);
+                        if (progress + 25 >= 100) {
+                          toast.success(`Challenge completed! You unlocked a new achievement, increased your streak to ${streakDays + 1} days, and earned the ${challenge.reward}!`);
+                        } else {
+                          toast.success(`Progress logged! ${challenge.title}: ${progress + 25}%`);
+                        }
+                      }}
+                    >
+                      Log activity
+                    </Button>
+                  </div>
                 </div>
-                <Progress className="mt-4" value={challenge.progress} />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
 
@@ -79,7 +118,7 @@ export function ChallengesBoard() {
             Achievement gallery
           </p>
           <div className="mt-5 space-y-3">
-            {data.achievements.map((achievement) => (
+            {achievements.map((achievement) => (
               <div
                 key={achievement.title}
                 className="rounded-[24px] border border-white/70 bg-gradient-to-br from-white to-emerald-50 px-4 py-4 dark:border-white/10 dark:from-white/5 dark:to-emerald-950/20"

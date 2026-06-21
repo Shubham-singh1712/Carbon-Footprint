@@ -36,9 +36,11 @@ const chartColors = ["#0f9f6f", "#45c48a", "#92ddb1", "#c7f0d6", "#d8efe1"];
 export function DashboardOverview() {
   const profile = useUserProfile((state) => state.profile);
   const onboardingComplete = useUserProfile((state) => state.onboardingComplete);
+  const reductionTargetKg = useUserProfile((state) => state.reductionTargetKg);
+  const streakDays = useUserProfile((state) => state.streakDays);
 
   const overviewQuery = useQuery({
-    queryKey: ["platform-overview", onboardingComplete, profile],
+    queryKey: ["platform-overview", onboardingComplete, profile, reductionTargetKg],
     queryFn: () => {
       let url = "/api/platform/overview";
       if (onboardingComplete && profile) {
@@ -55,6 +57,9 @@ export function DashboardOverview() {
           trainTripsPerYear: String(profile.travel.trainTripsPerYear),
           monthlySpend: String(profile.shopping.monthlySpend),
         });
+        if (reductionTargetKg) {
+          params.append("reductionTargetKg", String(reductionTargetKg));
+        }
         url += `?${params.toString()}`;
       }
       return typedFetch(url, { method: "GET", cache: "no-store" }, dashboardOverviewSchema);
@@ -87,6 +92,13 @@ export function DashboardOverview() {
     );
   }
 
+  const dynamicSummary = data.summary.map((item) => {
+    if (item.label.toLowerCase().includes("streak")) {
+      return { ...item, value: streakDays };
+    }
+    return item;
+  });
+
   return (
     <motion.div
       className="space-y-6"
@@ -99,7 +111,7 @@ export function DashboardOverview() {
         <motion.div variants={staggerItem}>
           <CarbonScoreCard score={data.healthScore} />
         </motion.div>
-        {data.summary.map((item) => (
+        {dynamicSummary.map((item) => (
           <motion.div key={item.label} variants={staggerItem}>
             <KpiCard {...item} />
           </motion.div>

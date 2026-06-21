@@ -17,6 +17,9 @@ import { formatNumber } from "@/lib/utils";
 import { treesEquivalent, carKmEquivalent } from "@/lib/carbon-engine";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 import { useUserProfile } from "@/stores/user-profile";
+import { toast } from "sonner";
+import { Target } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type ScenarioState = {
   commuteDays: number;
@@ -62,6 +65,7 @@ export function WhatIfSimulator() {
   
   const profile = useUserProfile((state) => state.profile);
   const onboardingComplete = useUserProfile((state) => state.onboardingComplete);
+  const setReductionTargetKg = useUserProfile((state) => state.setReductionTargetKg);
 
   useEffect(() => {
     if (onboardingComplete && profile) {
@@ -199,6 +203,17 @@ export function WhatIfSimulator() {
               <p className="text-[10px] text-muted">Car km equiv</p>
             </div>
           </div>
+          
+          <Button
+            className="w-full mt-5 rounded-2xl bg-accent text-white font-semibold hover:bg-accent-strong flex items-center justify-center gap-2 h-11"
+            onClick={() => {
+              setReductionTargetKg(comparison.modeled);
+              toast.success(`Simulation target of ${comparison.modeled.toFixed(0)} kg CO₂e saved and applied to your dashboard!`);
+            }}
+          >
+            <Target className="h-4 w-4" />
+            Commit Simulation as Target
+          </Button>
         </Card>
 
         {/* Comparison chart */}

@@ -78,6 +78,8 @@ export async function GET(request: Request) {
     monthlySpend: Number(searchParams.get("monthlySpend")) || 0,
   };
 
+  const customTarget = Number(searchParams.get("reductionTargetKg")) || 0;
+
   const profile = { transport, home, food, travel, shopping };
   const { total, breakdown } = calculateMonthlyFootprint(profile);
   const healthScore = calculateCarbonHealthScore(total);
@@ -124,13 +126,20 @@ export async function GET(request: Request) {
     },
   ];
 
+  const getTargetVal = (ratio: number) => {
+    if (customTarget > 0) {
+      return Math.round(customTarget * ratio);
+    }
+    return Math.round(total * ratio * 0.95);
+  };
+
   const trend = [
-    { period: "Jan", actual: Math.round(total * 1.25), target: Math.round(total * 1.15) },
-    { period: "Feb", actual: Math.round(total * 1.18), target: Math.round(total * 1.1) },
-    { period: "Mar", actual: Math.round(total * 1.12), target: Math.round(total * 1.05) },
-    { period: "Apr", actual: Math.round(total * 1.08), target: Math.round(total * 1.02) },
-    { period: "May", actual: Math.round(total * 1.04), target: Math.round(total * 0.98) },
-    { period: "Jun", actual: Math.round(total), target: Math.round(total * 0.95) },
+    { period: "Jan", actual: Math.round(total * 1.25), target: getTargetVal(1.3) },
+    { period: "Feb", actual: Math.round(total * 1.18), target: getTargetVal(1.22) },
+    { period: "Mar", actual: Math.round(total * 1.12), target: getTargetVal(1.15) },
+    { period: "Apr", actual: Math.round(total * 1.08), target: getTargetVal(1.1) },
+    { period: "May", actual: Math.round(total * 1.04), target: getTargetVal(1.05) },
+    { period: "Jun", actual: Math.round(total), target: getTargetVal(1.0) },
   ];
 
   const responseData = {

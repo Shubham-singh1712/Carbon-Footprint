@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 const categories: ReceiptAnalysisRequest["category"][] = [
   "food",
@@ -82,6 +83,13 @@ export function ReceiptScannerPanel() {
             onChange={(event) => {
               const file = event.target.files?.[0];
               if (file) {
+                if (file.size > 3 * 1024 * 1024) {
+                  toast.error("Receipt file is too large. Please upload an image or PDF under 3MB.");
+                  event.target.value = "";
+                  setFileName("No receipt selected");
+                  setImageRaw(null);
+                  return;
+                }
                 setFileName(file.name);
                 const reader = new FileReader();
                 reader.onloadend = () => {

@@ -1,108 +1,82 @@
-# Implementation Plan - Final AI Evaluation Optimization Pass
+# Implementation Plan - Maximizing Code Quality & Problem Alignment Scores
 
-The goal of this optimization pass is to maximize the AI evaluation score (targeting 97+ from the current 93.8) by addressing key areas in Code Quality (Type Safety, JSDoc Documentation, Utility/Hook extraction, Constants migration) and Problem Statement Alignment (AI Carbon Reduction Roadmap, Explainability Layer, Carbon Equivalence Engine, Behavioral Insights) without altering core contracts or introducing regression risks.
+This plan outlines optimizations to address the Hack2Skill evaluation findings (Attempt 2: 94.87/100 overall, with Code Quality at **89/100** and Alignment at **94/100**). We will introduce deep interactivity, state persistence, and client-side validations to elevate these sections above 97+.
 
 ---
 
 ## User Review Required
 
 > [!IMPORTANT]
-> To ensure backward compatibility, all existing schema properties, component flows, and page pathways are strictly preserved.
-> The optimizations are purely additive refactoring and modularization.
+> - **State Persistency**: Challenges progress, streak count, achievements, and simulator targets will now be persisted in `localStorage` via the existing Zustand store. This guarantees that interactions are saved across page reloads.
+> - **Dynamic Dashboard**: The dashboard trend lines will dynamically shift based on the target you set in the Simulator.
 
 ---
 
 ## Proposed Changes
 
-### Core Architecture & Refactoring
+### Core UI & Code Quality
+#### [MODIFY] [layout.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon%20Footprint/src/app/layout.tsx)
+* Inject a small, render-blocking inline script in the `<head>` to check `localStorage` theme settings and apply the `.dark` class immediately on load. This completely resolves the **Flash of Unstyled Content (FOUC)** theme issue.
 
-#### [NEW] [types/index.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/types/index.ts)
-* Create dedicated, JSDoc-documented interfaces:
-  * `CarbonProfile` (lifestyle parameters)
-  * `CarbonRecommendation` (with Explainability Layer support)
-  * `EmissionRecord` (monthly actual vs target)
-  * `ForecastData` (forecasting baseline vs optimized)
-  * `ChallengeProgress` (challenges status)
-  * `CommunityImpact` (equivalent savings and community ranking)
-  * `DashboardMetrics` (general carbon center indicators)
+#### [MODIFY] [platform-shell.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon%20Footprint/src/components/layout/platform-shell.tsx)
+* Convert the layout shell to a client component and use `usePathname` from `next/navigation` to dynamically highlight the active path in the mobile navigation bar.
 
-#### [NEW] [constants/index.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/constants/index.ts)
-* Centralize all hardcoded calculation and UI thresholds:
-  * `EMISSION_FACTORS` (Vehicle, electricity, flight, train, shopping multipliers)
-  * `CARBON_THRESHOLDS` (High/Medium/Low bands)
-  * `BADGE_REQUIREMENTS` (Milestone & challenges requirements)
+#### [MODIFY] [receipt-scanner-panel.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon%20Footprint/src/features/receipts/components/receipt-scanner-panel.tsx)
+* Add client-side size validation to the file input. Reject uploads larger than 3MB with a warning toast to prevent crashing serverless execution limits.
 
-#### [MODIFY] [carbon-engine.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/lib/carbon-engine.ts)
-* Refactor to use the centralized constants in `src/constants/index.ts`.
-* Add the **Carbon Equivalence Engine** helpers:
-  * `smartphoneChargesEquivalent(kgCO2e)` (Smartphone charges avoided)
-  * `treesEquivalent(kgCO2e)`
-  * `waterSavedLitres(kgCO2e)`
-  * `energyEquivalentKwh(kgCO2e)`
-  * `carKmEquivalent(kgCO2e)`
-* Add thorough JSDoc documentation to all utility functions.
-
-#### [NEW] [hooks/use-sustainability.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/hooks/use-sustainability.ts)
-* Abstract standard React Query fetches into clean, reusable custom hooks:
-  * `useCarbonScore()`
-  * `useForecast()`
-  * `useChallenges()`
-  * `useRecommendations()`
-  * `useCommunityImpact()`
+#### [MODIFY] [carbon-engine.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon%20Footprint/src/lib/carbon-engine.ts)
+* Simplify and optimize the math logic in `calculateShoppingFootprint` to remove redundant rounding calls.
 
 ---
 
-### Problem Statement Alignment
+### Problem Statement Alignment & Gamification
+#### [MODIFY] [user-profile.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon%20Footprint/src/stores/user-profile.ts)
+* Extend the Zustand `UserProfileState` model to persist the following gamification and targets data:
+  * `reductionTargetKg`: User's carbon reduction goal (default: 15% under baseline).
+  * `streakDays`: Active consecutive green habit streak (default: 13).
+  * `completedChallengesCount`: Total challenges completed (default: 8).
+  * `challengesProgress`: Record mapping active challenge titles to progress numbers.
+  * `achievementsUnlocked`: Array of unlocked badge/achievement structures.
+* Expose mutation actions:
+  * `setReductionTargetKg(kg)`
+  * `incrementChallengeProgress(title, increment)`
+  * `unlockAchievement(achievement)`
 
-#### [NEW] [reduction-roadmap.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/coach/components/reduction-roadmap.tsx)
-* Build a responsive **AI Carbon Reduction Roadmap (30-Day Plan)** displaying:
-  * Interactive accordion weeks 1–4 stepper.
-  * Details for each week: Action, Estimated CO₂ Reduction, Estimated Cost Savings, Difficulty Level, and Time commitment.
+#### [MODIFY] [what-if-simulator.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon%20Footprint/src/features/simulator/components/what-if-simulator.tsx)
+* Add an interactive button: **"Commit Simulation as Target"**.
+* Clicking this button updates `reductionTargetKg` in the Zustand store and displays a success toast.
 
-#### [NEW] [behavioral-insights.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/coach/components/behavioral-insights.tsx)
-* Build an **Explainability Layer** and **Behavioral Insights** component:
-  * Explains *why* recommendations were generated based on active profile categories.
-  * Shows key insights: Top emission source, Most improved category, Highest-impact opportunity, Monthly sustainability score, and Confidence Score.
+#### [MODIFY] [overview/route.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon%20Footprint/src/app/api/platform/overview/route.ts)
+* Update the GET endpoint to read the optional `reductionTargetKg` parameter from search queries.
+* Calculate the dynamic dashboard baseline/target comparison vectors relative to this custom target value instead of hardcoded ratios.
 
-#### [MODIFY] [coach-console.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/coach/components/coach-console.tsx)
-* Integrate `ReductionRoadmap` and `BehavioralInsights` on the right side of the panel.
-* Add explainability details to the conversational recommendation layout.
+#### [MODIFY] [dashboard-overview.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon%20Footprint/src/features/dashboard/components/dashboard-overview.tsx)
+* Extract the custom `reductionTargetKg` from the Zustand store and pass it as a query parameter inside `overviewQuery`.
+* Bind the **Green Habit Streak** display card directly to the persisted `streakDays` Zustand state.
 
-#### [MODIFY] [coach/schemas.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/features/coach/schemas.ts)
-* Extend the `recommendationSchema` to include optional explainability parameters: `whyGenerated`, `dataInfluenced`, `expectedImpact`, and `confidenceScore`.
-
-#### [MODIFY] [coach/route.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/app/api/platform/coach/route.ts)
-* Update fallback responses and instruction prompt to generate explainability values.
-
----
-
-### Testing & Documentation
-
-#### [NEW] [sustainability.test.ts](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/src/tests/unit/sustainability.test.ts)
-* Add unit tests for the Carbon Equivalence Engine and custom hook selectors to boost test coverage.
-
-#### [MODIFY] [README.md](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon Footprint/README.md)
-* Enhance project documentation with:
-  * Mermaid Architecture and Data Flow diagrams.
-  * Formal matrix lists for Testing, Security, Accessibility, and Performance strategies.
+#### [MODIFY] [challenges-board.tsx](file:///c:/Users/SHUBHAM/OneDrive/Documents/Carbon%20Footprint/src/features/challenges/components/challenges-board.tsx)
+* Refactor the page to read and modify state using the Zustand `useUserProfile` store (enabling full client-side mock persistence).
+* Add a **"Log Activity"** button to the active challenges cards.
+* Clicking this button increments progress by **25%** and fires a toast.
+* When progress reaches **100%**, display a custom success toast (e.g., *"Transit Trailblazer Unlocked!"*), update the completed challenge count, increase the streak counter by 1, and add the achievement to the gallery.
 
 ---
 
 ## Verification Plan
 
 ### Automated Tests
-* Run `npm run test` to verify existing and new tests pass successfully:
+* Run unit tests to check state updating mutations:
   ```bash
   npm run test
   ```
-* Run typecheck and lint to verify zero warnings:
+* Run linter and typecheck to verify zero warnings:
   ```bash
   npm run typecheck
   npm run lint
   ```
 
 ### Manual Verification
-* Run local production build to confirm build safety:
+* Run production builds to check bundle optimization:
   ```bash
   npm run build
   ```
